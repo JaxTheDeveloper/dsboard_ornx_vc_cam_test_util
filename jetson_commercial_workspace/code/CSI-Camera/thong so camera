@@ -1,0 +1,27 @@
+Camera Controls
+
+                     group_hold 0x009a2003 (bool)   : default=0 value=0 flags=execute-on-write
+                    sensor_mode 0x009a2008 (int64)  : min=0 max=1 step=1 default=0 value=0 flags=slider
+                           gain 0x009a2009 (int64)  : min=0 max=27000 step=26 default=0 value=3016 flags=slider
+                       exposure 0x009a200a (int64)  : min=1 max=1310660 step=1 default=10000 value=47984 flags=slider
+                     frame_rate 0x009a200b (int64)  : min=0 max=26824 step=1 default=0 value=20000 flags=slider
+                   trigger_mode 0x009a200f (int)    : min=0 max=7 step=1 default=0 value=0
+                        io_mode 0x009a2010 (int)    : min=0 max=5 step=1 default=0 value=0
+                    black_level 0x009a2011 (int)    : min=0 max=100000 step=1 default=0 value=0
+                 single_trigger 0x009a2012 (button) : flags=write-only, execute-on-write
+                   binning_mode 0x009a2013 (int)    : min=0 max=7 step=1 default=0 value=0
+           sensor_configuration 0x009a2032 (u32)    : min=0 max=4294967295 step=1 default=0 [22] flags=read-only, volatile, has-payload
+         sensor_mode_i2c_packet 0x009a2033 (u32)    : min=0 max=4294967295 step=1 default=0 [1026] flags=read-only, volatile, has-payload
+      sensor_control_i2c_packet 0x009a2034 (u32)    : min=0 max=4294967295 step=1 default=0 [1026] flags=read-only, volatile, has-payload
+                    bypass_mode 0x009a2064 (intmenu): min=0 max=1 default=0 value=1
+                override_enable 0x009a2065 (intmenu): min=0 max=1 default=0 value=1
+                   height_align 0x009a2066 (int)    : min=1 max=16 step=1 default=1 value=1
+                     size_align 0x009a2067 (intmenu): min=0 max=2 default=0 value=0
+               write_isp_format 0x009a2068 (int)    : min=1 max=1 step=1 default=1 value=1
+       sensor_signal_properties 0x009a2069 (u32)    : min=0 max=4294967295 step=1 default=0 [30][18] flags=read-only, has-payload
+        sensor_image_properties 0x009a206a (u32)    : min=0 max=4294967295 step=1 default=0 [30][19] flags=read-only, has-payload
+      sensor_control_properties 0x009a206b (u32)    : min=0 max=4294967295 step=1 default=0 [30][36] flags=read-only, has-payload
+              sensor_dv_timings 0x009a206c (u32)    : min=0 max=4294967295 step=1 default=0 [30][16] flags=read-only, has-payload
+               low_latency_mode 0x009a206d (bool)   : default=0 value=0
+               preferred_stride 0x009a206e (int)    : min=0 max=65535 step=1 default=0 value=0
+                   sensor_modes 0x009a2082 (int)    : min=0 max=30 step=1 default=30 value=1 flags=read-only

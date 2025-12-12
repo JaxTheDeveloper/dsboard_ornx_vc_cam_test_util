@@ -1,0 +1,57 @@
+import time
+import Adafruit_PCA9685
+
+
+I2C_BUS_NUMBER = 0
+# i would expect the pca to be found at this address
+PCA9685_ADDRESS = 0x40
+SERVO_FREQ = 50 
+
+# guessing around (pulse resolution is 16 bit)
+SERVO_MIN_PULSE = 205  # Corresponds to 0 degrees (1ms)
+SERVO_MAX_PULSE = 410  # Corresponds to 180 degrees (2ms)
+
+
+
+def set_servo_angle(channel, angle):
+    
+    pulse_range = SERVO_MAX_PULSE - SERVO_MIN_PULSE
+    pulse = (angle / 180.0) * pulse_range + SERVO_MIN_PULSE
+
+    pulse = int(pulse)
+    pwm.set_pwm(channel, 0, pulse)
+
+print(f"connecting to bus {I2C_BUS_NUMBER}...")
+
+try:
+    pwm = Adafruit_PCA9685.PCA9685(address=PCA9685_ADDRESS, busnum=I2C_BUS_NUMBER)
+except Exception as e:
+    print(e)
+    print(f"Details: {e}")
+    exit()
+
+pwm.set_pwm_freq(SERVO_FREQ)
+
+try:
+    while True:
+        # 0 to 180 deg
+        for i in range (0, 180 + 1):
+            set_servo_angle(12, i)
+            set_servo_angle(13, i)
+            set_servo_angle(14, i)
+            time.sleep(0.005)
+            
+        # from 180 to 0
+        for i in range (180 - 1, -1, -1):
+            set_servo_angle(12, i)
+            set_servo_angle(13, i)
+            set_servo_angle(14, i)
+            time.sleep(0.005)
+
+except KeyboardInterrupt:
+    print("\nexiting, bye bye.")
+    # cleanup
+    set_servo_angle(12, 0)
+    set_servo_angle(13, 0)
+    set_servo_angle(14, 0)
+    time.sleep(0.5)

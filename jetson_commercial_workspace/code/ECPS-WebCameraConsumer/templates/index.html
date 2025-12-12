@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Camera Control</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #121212;
+            color: #e0e0e0;
+            display: grid;
+            grid-template-areas:
+                "header"
+                "video"
+                "controls";
+            grid-template-rows: auto 1fr auto;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+        }
+
+        header {
+            grid-area: header;
+            background-color: #1e1e1e;
+            padding: 1rem 2rem;
+            border-bottom: 1px solid #333;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 1.5rem;
+        }
+
+        .video-container {
+            grid-area: video;
+            background-color: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            position: relative;
+        }
+
+        #video_feed {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        #message {
+            position: absolute;
+            color: #888;
+            font-size: 1.2rem;
+        }
+
+        .controls-container {
+            grid-area: controls;
+            background-color: #1e1e1e;
+            padding: 1.5rem 2rem;
+            border-top: 1px solid #333;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .slider-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .slider-group label {
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+            color: #aaa;
+        }
+
+        .slider-label {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .slider-value {
+            font-weight: bold;
+            color: #fff;
+            background-color: #333;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.9rem;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            margin: 0;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 1rem;
+            align-items: flex-start;
+        }
+
+        button {
+            padding: 0.8rem 1.2rem;
+            font-size: 1rem;
+            font-weight: bold;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        #connectButton {
+            background-color: #2a9d8f;
+            color: white;
+        }
+
+        #connectButton:hover {
+            background-color: #268a7e;
+        }
+
+        #connectButton.connected {
+            background-color: #e76f51;
+        }
+
+        #connectButton.connected:hover {
+            background-color: #d16143;
+        }
+
+        .status-group {
+            background-color: #2c2c2c;
+            padding: 1rem;
+            border-radius: 8px;
+        }
+
+        .status-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 1.1rem;
+        }
+
+        .status-item span:first-child {
+            color: #aaa;
+            font-weight: normal;
+        }
+
+        .status-item span:last-child {
+            color: #fff;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        /* mobile layout */
+        @media (max-width: 768px) {
+            body {
+                grid-template-areas:
+                    "header"
+                    "video"
+                    "controls";
+                grid-template-rows: auto 1fr auto;
+                height: 100vh;
+            }
+
+            .controls-container {
+                grid-template-columns: 1fr;
+                padding: 1rem;
+                gap: 1rem;
+            }
+
+            header {
+                padding: 1rem;
+            }
+
+            h1 {
+                font-size: 1.2rem;
+            }
+
+            button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <h1>Camera Control</h1>
+    </header>
+
+    <div class="video-container">
+        <img id="video_feed" src="" alt="Video Feed">
+        <div id="message">Camera is offline</div>
+    </div>
+
+    <div class="controls-container">
+        <div class="control-group">
+            <div class="slider-group">
+                <div class="slider-label">
+                    <label for="gainSlider">GAIN</label>
+                    <span id="gainValue" class="slider-value">...</span>
+                </div>
+                <input type="range" id="gainSlider" min="0" max="27000" step="26">
+            </div>
+
+            <div class="slider-group">
+                <div class="slider-label">
+                    <label for="exposureSlider">EXPOSURE</label>
+                    <span id="exposureValue" class="slider-value">...</span>
+                </div>
+                <input type="range" id="exposureSlider" min="1" max="1310660" step="1">
+            </div>
+
+            <div class="slider-group">
+                <div class="slider-label">
+                    <label for="blackLevelSlider">BLACK LEVEL</label>
+                    <span id="blackLevelValue" class="slider-value">...</span>
+                </div>
+                <input type="range" id="blackLevelSlider" min="0" max="100000" step="1">
+            </div>
+        </div>
+
+        <div class="control-group">
+            <div classs="button-group">
+                <button id="connectButton">Connect Camera</button>
+            </div>
+
+            <div class="status-group">
+                <div class="status-item">
+                    <span>gray</span>
+                    <span id="grayLevel">--</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            // get all ui elements
+            const videoFeed = document.getElementById('video_feed');
+            const message = document.getElementById('message');
+            const connectButton = document.getElementById('connectButton');
+
+            const gainSlider = document.getElementById('gainSlider');
+            const exposureSlider = document.getElementById('exposureSlider');
+            const blackLevelSlider = document.getElementById('blackLevelSlider');
+
+            const gainValue = document.getElementById('gainValue');
+            const exposureValue = document.getElementById('exposureValue');
+            const blackLevelValue = document.getElementById('blackLevelValue');
+
+            const grayLevel = document.getElementById('grayLevel');
+
+            let isCameraConnected = false;
+            let statusInterval = null;
+
+            // --- camera connection ---
+
+            connectButton.addEventListener('click', () => {
+                if (isCameraConnected) {
+                    stopCamera();
+                } else {
+                    startCamera();
+                }
+            });
+
+            function startCamera() {
+                console.log('Starting camera...');
+                fetch('/start_camera', { method: 'POST' })
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log('Server response:', data);
+                        if (data.status === 'camera starting') {
+                            // give server time to start camera
+                            setTimeout(() => {
+                                videoFeed.src = `/video_feed?_t=${new Date().getTime()}`; // cache buster
+                                videoFeed.style.display = 'block';
+                                message.style.display = 'none';
+                            }, 1000);
+
+                            connectButton.textContent = 'Stop Camera';
+                            connectButton.classList.add('connected');
+                            isCameraConnected = true;
+                            startStatusPolling();
+                        }
+                    })
+                    .catch(err => {
+                        console.error('Error starting camera:', err);
+                        message.textContent = 'Error starting camera.';
+                        message.style.display = 'block';
+                    });
+            }
+
+            function stopCamera() {
+                console.log('Stopping camera...');
+                fetch('/stop_camera', { method: 'POST' })
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log('Server response:', data);
+                        videoFeed.src = '';
+                        videoFeed.style.display = 'none';
+                        message.textContent = 'Camera is offline';
+                        message.style.display = 'block';
+
+                        connectButton.textContent = 'Connect Camera';
+                        connectButton.classList.remove('connected');
+                        isCameraConnected = false;
+                        stopStatusPolling();
+                        grayLevel.textContent = '--';
+                    })
+                    .catch(err => {
+                        console.error('Error stopping camera:', err);
+                    });
+            }
+
+            // --- control sliders ---
+
+            // send control update to server
+            // 'input' event fires continuously
+            // 'change' event fires on mouse up
+            gainSlider.addEventListener('input', () => sendControls('gain'));
+            exposureSlider.addEventListener('input', () => sendControls('exposure'));
+            blackLevelSlider.addEventListener('input', () => sendControls('black_level'));
+
+            gainSlider.addEventListener('change', () => sendControls('gain', true));
+            exposureSlider.addEventListener('change', () => sendControls('exposure', true));
+            blackLevelSlider.addEventListener('change', () => sendControls('black_level', true));
+
+            // we use a timer to avoid sending too many requests
+            let sendTimer = null;
+
+            function sendControls(source, force = false) {
+                // update the ui label immediately
+                if (source === 'gain') gainValue.textContent = gainSlider.value;
+                if (source === 'exposure') exposureValue.textContent = exposureSlider.value;
+                if (source === 'black_level') blackLevelValue.textContent = blackLevelSlider.value;
+
+                // clear the timer if we get a new event
+                if (sendTimer) clearTimeout(sendTimer);
+
+                // set a new timer
+                // 'input' events wait 100ms
+                // 'change' events (force=true) send immediately (0ms)
+                sendTimer = setTimeout(() => {
+                    const controls = {
+                        gain: parseInt(gainSlider.value, 10),
+                        exposure: parseInt(exposureSlider.value, 10),
+                        black_level: parseInt(blackLevelSlider.value, 10)
+                    };
+
+                    console.log('Sending controls:', controls);
+
+                    fetch('/set_controls', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(controls)
+                    });
+                }, force ? 0 : 100);
+            }
+
+            // --- status polling ---
+
+            // get status from server (gray level, slider sync)
+            function startStatusPolling() {
+                if (statusInterval) clearInterval(statusInterval);
+
+                // run once immediately
+                fetchStatus();
+
+                // then run every 2 seconds
+                statusInterval = setInterval(fetchStatus, 2000);
+            }
+
+            function stopStatusPolling() {
+                if (statusInterval) clearInterval(statusInterval);
+                statusInterval = null;
+            }
+
+            function fetchStatus() {
+                if (!isCameraConnected) return;
+
+                fetch('/get_status')
+                    .then(response => response.json())
+                    .then(data => {
+                        // console.log('Status received:', data);
+
+                        // update gray level
+                        grayLevel.textContent = data.gray_level;
+
+                        // sync slider values and labels
+                        gainSlider.value = data.controls.gain;
+                        gainValue.textContent = data.controls.gain;
+
+                        exposureSlider.value = data.controls.exposure;
+                        exposureValue.textContent = data.controls.exposure;
+
+                        blackLevelSlider.value = data.controls.black_level;
+                        blackLevelValue.textContent = data.controls.black_level;
+
+                        // check if camera died on the server
+                        if (!data.is_running && isCameraConnected) {
+                            console.warn('Server reports camera is not running. Stopping UI.');
+                            stopCamera();
+                        }
+                    })
+                    .catch(err => {
+                        console.error('Error fetching status:', err);
+                        // if we fail to get status assume connection is lost
+                        stopCamera();
+                    });
+            }
+
+            // check server state on page load
+            fetchStatus();
+        });
+    </script>
+</body>
+
+</html>
